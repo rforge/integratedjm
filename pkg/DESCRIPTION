@@ -1,0 +1,12 @@
+Package: IntegratedJM
+Type: Package
+Title: Joint Modelling of the Gene-expression and Bioassay Data, taking care of the effect due to a Fingerprint Feature
+Version: 1.0
+Date: 2015-09-14
+Author: Rudradev Sengupta, Nolen Joy Perualila
+Maintainer: Rudradev Sengupta <rudradev.sengupta@uhasselt.be>
+Description: Offers modelling the association between gene-expression and bioassay data, taking care of the effect due to a fingerprint feautre and helps with several plots to better understand the analysis.
+Depends: R (>= 2.15.1), Biobase
+Imports: ggplot2, nlme, grid
+License: GPL-3
+LazyLoad: yes
