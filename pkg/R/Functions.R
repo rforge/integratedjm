@@ -723,6 +723,10 @@ getCorrUnad <- function(geneName,fp,fpName,responseVector,dat,resPlot){
   
 }
 
+
+
 if(getRversion() >= "2.15.1"){
 	globalVariables(c("gene", "activity", "adjPeffect1", "pAdjR"))
 }
+
+
