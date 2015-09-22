@@ -1,6 +1,6 @@
 Package: IntegratedJM
 Type: Package
-Title: Joint Modelling of the Gene-expression and Bioassay Data, taking care of the effect due to a Fingerprint Feature
+Title: Joint Modelling of the Gene-Expression and Bioassay Data, Taking Care of the Effect Due to a Fingerprint Feature
 Version: 1.1
 Date: 2015-09-17
 Author: Rudradev Sengupta, Nolen Joy Perualila
