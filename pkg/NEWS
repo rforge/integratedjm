@@ -1,4 +1,6 @@
 1.1
     o first version of the package
-
+	
+1.2
+    o modified R-version constraint, added volcano plot
 	

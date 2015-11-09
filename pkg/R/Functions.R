@@ -611,7 +611,7 @@ plot1gene <- function(geneName,fp,fpName = "",responseVector,dat,resPlot=TRUE,co
    theme(strip.text.x = element_text(face="bold",size=14))
  
 
- multiplot(plot1,plot2,cols=2)
+ multiplot(plot1,plot2,cols=1)
  
  } else {
     
@@ -700,7 +700,7 @@ getCorrUnad <- function(geneName,fp,fpName,responseVector,dat,resPlot){
                    weights = varIdent(form=~ 1|respIndex),
                    data = data, method = "ML"),silent=TRUE)
     
-    plot_dat1 <- data.frame(cbind(gene=myResp1,activity=responseVector, fp=fp,fpId=c(rep(paste0(geneName,",FP:",fpName),length(fp)))))
+    plot_dat1 <- data.frame(cbind(gene=myResp1,activity=responseVector, fp=fp,fpId=c(rep(paste0(geneName,",Observed:",fpName),length(fp)))))
     plot_dat2 <- data.frame(cbind(gene=residuals(f1)[1:length(myResp1)],activity=residuals(f1)[(length(myResp1)+1):length(data$Responses)], 
                                   fp=fp,fpId=c(rep(paste0(geneName,",Residuals:",fpName),length(fp)))))
     dataoneGene <- list(plot_dat1,plot_dat2,pearson) 
@@ -722,6 +722,113 @@ getCorrUnad <- function(geneName,fp,fpName,responseVector,dat,resPlot){
   
   
 }
+
+
+#' @title volcano
+#' 
+#' @description The volcano function produces the volcano plot for logratio / fp-effect vs corresponding p-values.
+#' @export
+#' @param x Numeric vector of logratios or covariate effect values to be plotted.
+#' @param pValue Numeric vector of corresponding p-values obtained from some statistical test.
+#' @param pointLabels Character vector providing the texts for the points to be labelled in the plot.
+#' @param topPValues Number of top p-values to be labelled. Default value is 10.
+#' @param topXvalues Number of top logratios or covariate effect values to be labelled. Default value is 10.
+#' @param smoothScatter Logical parameter to decide if a smooth plot is expected or not. Default is TRUE.
+#' @param xlab Text for the x-axis of the plot. Default is NULL.
+#' @param ylab Text for the y-axis of the plot. Default is NULL.
+#' @param main Text for the main title of the plot. Default is NULL.
+#' @param newpage Logical parameter
+#' @param additionalPointsToLabel Set of points other than the top values to be labelled in the plot. Default is NULL.
+#' @param additionalLabelColor Colour of the additionally labelled points. Default colour is red.
+#' @param dir Logical parameter deciding if the top values should be in decreasing (= TRUE) or increasing (= FALSE) order. Default is TRUE.
+#' @return A plot which looks like a volcano.
+#' @details Creates a plot which looks like a volcano with the interesting points labelled within the plot.
+#' @examples
+#' \dontrun{
+#' volcano(x=jmRes$CovEffect1,pValue=jmRes$rawP1,pointLabels=rownames(jmRes),
+#' topPValues = 10, topXvalues = 10,xlab="FP Effect (alpha)",ylab="-log(p-values)")
+#' }
+
+
+
+volcano <- function (x, pValue, pointLabels, topPValues = 10, topXvalues = 10, 
+                smoothScatter = TRUE, xlab = NULL, ylab = NULL, main = NULL,
+                newpage = TRUE, additionalPointsToLabel = NULL, 
+                additionalLabelColor = "red", dir=TRUE) 
+{
+  logRatio <- x
+  pVals <- -log10(pValue)
+  topLR <- order(abs(logRatio), decreasing = dir)[seq(length.out = topXvalues)]
+  topP <- order(abs(pVals), decreasing = dir)[seq(length.out = topPValues)]
+  pointsToLabel <- union(topP, topLR)
+  pointsToLabel <- union(pointsToLabel, which(names(logRatio) %in% additionalPointsToLabel))
+                                                
+  if (is.null(additionalPointsToLabel)) {
+    colPointsToLabel <- rep("black", length(pointsToLabel))
+  } else {
+    if (is.null(names(logRatio))) {
+      stop("labeling additional points required a named vector for the logRatios")
+    } else {
+      colPointsToLabel <- ifelse(names(logRatio)[pointsToLabel] %in% 
+                                   additionalPointsToLabel, additionalLabelColor, 
+                                 "black")
+    }
+  }
+  
+  if (newpage) 
+  
+  grid.newpage()
+  
+  pvp <- plotViewport(c(5, 6, 5, 3))
+  pushViewport(pvp)
+  tg <- textGrob(label = pointLabels[pointsToLabel], x = unit(logRatio[pointsToLabel], 
+                                                              "native"), y = unit(pVals[pointsToLabel], "native"), 
+                 gp = gpar(cex = 0.65, col = colPointsToLabel))
+  maxLabelWidth <- max(grobWidth(tg))
+  nMaxLabelWidth <- convertHeight(maxLabelWidth, "native", valueOnly = TRUE)
+  
+  xr <- max(abs(min(logRatio)),abs(max(logRatio)))
+  xr_ep <- c(-xr,xr)
+  
+  dvp <- dataViewport(xscale = xr_ep + c(-nMaxLabelWidth/2.2, 
+                                                   nMaxLabelWidth/2.2), yscale = range(pVals, na.rm = TRUE))
+  pushViewport(dvp)
+  atPositionsY <- seq(0,ceiling(max(current.viewport()$yscale)),2)
+  grid.yaxis(name = "ya", at = atPositionsY, label = atPositionsY)
+  xa <- xaxisGrob(name = "xa")
+  moveUnit <- unit(-0.5, "char")
+  xa <- editGrob(xa, edits = gEditList(gEdit("major", y = moveUnit),gEdit("ticks", y0 = moveUnit), gEdit("ticks", y1 = unit(-0.5, "lines") + moveUnit),
+                                         gEdit("labels", y = unit(-1.5, "lines") + moveUnit)))
+                                                                                               
+                                                                                                                                              
+  grid.draw(xa)
+  
+  dotColors <- if (smoothScatter) {
+    densCols(x = logRatio[-pointsToLabel], y = pVals[-pointsToLabel],colramp = colorRampPalette(blues9[-(1:3)]))
+  } else {
+    "#9ECAE1"
+  }
+  
+  grid.points(x = unit(logRatio[-pointsToLabel], "native"), 
+              y = unit(pVals[-pointsToLabel], "native"), pch = 20, 
+              gp = gpar(col = dotColors))
+  grid.draw(tg)
+  if (!is.null(main)) {
+    grid.text(label = main, y = unit(1, "npc") + unit(2, "lines"), gp = gpar(fontface = "bold"))
+                                                      
+  }
+
+  if (!is.null(xlab)) {
+    grid.text(label = xlab, y = unit(-3, "lines") + 0.5 * 
+                moveUnit)
+  }
+  if (!is.null(ylab)) {
+    grid.text(label = ylab, x = unit(-4.5, "lines"), rot = 90)
+  }
+}
+
+
+
 
 
 
