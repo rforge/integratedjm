@@ -754,8 +754,7 @@ getCorrUnad <- function(geneName,fp,fpName,responseVector,dat,resPlot){
 volcano <- function (x, pValue, pointLabels, topPValues = 10, topXvalues = 10, 
                 smoothScatter = TRUE, xlab = NULL, ylab = NULL, main = NULL,
                 newpage = TRUE, additionalPointsToLabel = NULL, 
-                additionalLabelColor = "red", dir=TRUE) 
-{
+                additionalLabelColor = "red", dir=TRUE) {
   logRatio <- x
   pVals <- -log10(pValue)
   topLR <- order(abs(logRatio), decreasing = dir)[seq(length.out = topXvalues)]
