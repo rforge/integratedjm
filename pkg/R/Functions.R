@@ -578,64 +578,65 @@ multiplot <- function(..., cols=1) {
 
 
 plot1gene <- function(geneName,fp,fpName = "",responseVector,dat,resPlot=TRUE,colP = "blue",colA = "white"){ 
- 
-    
   
- if(is.character(geneName) == TRUE && length(fp) == length(responseVector)) {
- 
- if(resPlot){
   
-   
-   data1gene_1 <- getCorrUnad(geneName,fp,fpName,responseVector,dat,resPlot)[[1]]
-   data1gene_2 <- getCorrUnad(geneName,fp,fpName,responseVector,dat,resPlot)[[2]]
-   UnadjPearson <- getCorrUnad(geneName,fp,fpName,responseVector,dat,resPlot)[[3]]
- 
- plot1 <- ggplot(data1gene_1,aes(x=as.numeric(as.vector(gene)), y=as.numeric(as.vector(activity)))) +
-   xlab("Gene Expression") +  
-   ylab ("Activity")+
-   facet_grid(.~fpId, scales="free")+
-   geom_point(aes(fill=factor(fp)),size=8, shape=21) +
-   scale_fill_manual("FP:",values = c("0" = colA,"1" = colP),labels=c("0 - absent", "1 - present"))+
-   ggtitle(paste("Unadj. Asso.",UnadjPearson))+
-   geom_smooth(method = lm)+
-   theme(strip.text.x = element_text(face="bold",size=14))
-
- plot2 <- ggplot(data1gene_2,aes(x=as.numeric(as.vector(gene)), y=as.numeric(as.vector(activity)))) +
-   xlab("Gene Expression") +  
-   ylab ("Activity")+
-   facet_grid(.~fpId, scales="free")+
-   geom_point(aes(fill=factor(fp)),size=8, shape=21) +
-   scale_fill_manual("FP:",values = c("0" = colA,"1" = colP),labels=c("0 - absent", "1 - present"))+
-   ggtitle("")+
-   geom_smooth(method = lm)+
-   theme(strip.text.x = element_text(face="bold",size=14))
- 
-
- multiplot(plot1,plot2,cols=1)
- 
- } else {
+  
+  if(is.character(geneName) == TRUE && length(fp) == length(responseVector)) {
     
-   
-   data1gene <- getCorrUnad(geneName,fp,fpName,responseVector,dat,resPlot)[[1]]
-   UnadjPearson <- getCorrUnad(geneName,fp,fpName,responseVector,dat,resPlot)[[2]]
-   
-   ggplot(data1gene,aes(x=as.numeric(as.vector(gene)), y=as.numeric(as.vector(activity)))) +
-     xlab("Gene Expression") +  
-     ylab ("Activity")+
-     facet_grid(.~fpId, scales="free")+
-     geom_point(aes(fill=factor(fp)),size=8, shape=21) +
-     scale_fill_manual("FP:",values = c("0" = colA,"1" = colP),labels=c("0 - absent", "1 - present"))+
-     ggtitle(paste("Unadj. Asso.",UnadjPearson))+
-     geom_smooth(method = lm)+
-     theme(strip.text.x = element_text(face="bold",size=14))
- 
- }
-   
-}   else {
-   
-   stop("missing or wrong data type of parameter:geneName should be character and fp should be numeric")
-}
-
+    if(resPlot){
+      
+      
+      data1gene_1 <- getCorrUnad(geneName,fp,fpName,responseVector,dat,resPlot)[[1]]
+      data1gene_2 <- getCorrUnad(geneName,fp,fpName,responseVector,dat,resPlot)[[2]]
+      UnadjPearson <- getCorrUnad(geneName,fp,fpName,responseVector,dat,resPlot)[[3]]
+      AdjPearson <- getCorrUnad(geneName,fp,fpName,responseVector,dat,resPlot)[[4]]
+      
+      plot1 <- ggplot(data1gene_1,aes(x=as.numeric(as.vector(gene)), y=as.numeric(as.vector(activity)))) +
+        xlab("Gene Expression") +  
+        ylab ("Activity")+
+        facet_grid(.~fpId, scales="free")+
+        geom_point(aes(fill=factor(fp)),size=8, shape=21) +
+        scale_fill_manual("FP:",values = c("0" = colA,"1" = colP),labels=c("0 - absent", "1 - present"))+
+        ggtitle(paste("Unadj. Asso.",UnadjPearson))+
+        geom_smooth(method = lm)+
+        theme(strip.text.x = element_text(face="bold",size=14))
+      
+      plot2 <- ggplot(data1gene_2,aes(x=as.numeric(as.vector(gene)), y=as.numeric(as.vector(activity)))) +
+        xlab("Gene Expression") +  
+        ylab ("Activity")+
+        facet_grid(.~fpId, scales="free")+
+        geom_point(aes(fill=factor(fp)),size=8, shape=21) +
+        scale_fill_manual("FP:",values = c("0" = colA,"1" = colP),labels=c("0 - absent", "1 - present"))+
+        ggtitle(paste("Adj. Asso.",AdjPearson))+
+        geom_smooth(method = lm)+
+        theme(strip.text.x = element_text(face="bold",size=14))
+      
+      
+      multiplot(plot1,plot2,cols=1)
+      
+    } else {
+      
+      
+      data1gene <- getCorrUnad(geneName,fp,fpName,responseVector,dat,resPlot)[[1]]
+      UnadjPearson <- getCorrUnad(geneName,fp,fpName,responseVector,dat,resPlot)[[2]]
+      
+      ggplot(data1gene,aes(x=as.numeric(as.vector(gene)), y=as.numeric(as.vector(activity)))) +
+        xlab("Gene Expression") +  
+        ylab ("Activity")+
+        facet_grid(.~fpId, scales="free")+
+        geom_point(aes(fill=factor(fp)),size=8, shape=21) +
+        scale_fill_manual("FP:",values = c("0" = colA,"1" = colP),labels=c("0 - absent", "1 - present"))+
+        ggtitle(paste("Unadj. Asso.",UnadjPearson))+
+        geom_smooth(method = lm)+
+        theme(strip.text.x = element_text(face="bold",size=14))
+      
+    }
+    
+  }   else {
+    
+    stop("missing or wrong data type of parameter:geneName should be character and fp should be numeric")
+  }
+  
 }
 
 
@@ -700,10 +701,12 @@ getCorrUnad <- function(geneName,fp,fpName,responseVector,dat,resPlot){
                    weights = varIdent(form=~ 1|respIndex),
                    data = data, method = "ML"),silent=TRUE)
     
+    gcorr<-round(try(getVarCov(f1)[1,2]/(sqrt(getVarCov(f1)[1,1])* sqrt(getVarCov(f1)[2,2]) ),silent=TRUE),4)						
+    
     plot_dat1 <- data.frame(cbind(gene=myResp1,activity=responseVector, fp=fp,fpId=c(rep(paste0(geneName,",Observed:",fpName),length(fp)))))
     plot_dat2 <- data.frame(cbind(gene=residuals(f1)[1:length(myResp1)],activity=residuals(f1)[(length(myResp1)+1):length(data$Responses)], 
                                   fp=fp,fpId=c(rep(paste0(geneName,",Residuals:",fpName),length(fp)))))
-    dataoneGene <- list(plot_dat1,plot_dat2,pearson) 
+    dataoneGene <- list(plot_dat1,plot_dat2,pearson,gcorr) 
     return(dataoneGene)
     
     
@@ -717,7 +720,7 @@ getCorrUnad <- function(geneName,fp,fpName,responseVector,dat,resPlot){
     
     
   }
-                               
+  
   
   
   
@@ -789,8 +792,8 @@ volcano <- function (x, pValue, pointLabels, topPValues = 10, topXvalues = 10,
   xr <- max(abs(min(logRatio)),abs(max(logRatio)))
   xr_ep <- c(-xr,xr)
   
-  dvp <- dataViewport(xscale = xr_ep + c(-nMaxLabelWidth/2.2, 
-                                                   nMaxLabelWidth/2.2), yscale = range(pVals, na.rm = TRUE))
+  dvp <- dataViewport(xscale = xr_ep + c(-nMaxLabelWidth/8, 
+                                                   nMaxLabelWidth/8), yscale = range(pVals, na.rm = TRUE))
   pushViewport(dvp)
   atPositionsY <- seq(0,ceiling(max(current.viewport()$yscale)),2)
   grid.yaxis(name = "ya", at = atPositionsY, label = atPositionsY)
