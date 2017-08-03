@@ -11,3 +11,5 @@
     o modification to integrate with the ggplot2 update
 	o corrected typos
 	
+1.6
+    o updated plot1gene without resPlot case to have title in the centre after ggplo2 update

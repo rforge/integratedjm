@@ -629,6 +629,8 @@ plot1gene <- function(geneName,fp,fpName = "",responseVector,dat,resPlot=TRUE,co
         geom_point(aes(fill=factor(fp)),size=8, shape=21) +
         scale_fill_manual("FP:",values = c("0" = colA,"1" = colP),labels=c("0 - absent", "1 - present"))+
         ggtitle(paste("Unadj. Asso.",UnadjPearson))+
+		theme(axis.text.x = element_text( hjust=0, vjust=1),
+          plot.title = element_text(size = 20, face = "bold", colour = "black", vjust = -2,hjust = 0.5))
         geom_smooth(method = lm)+
         theme(strip.text.x = element_text(face="bold",size=14))
       
